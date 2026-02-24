@@ -51,7 +51,7 @@ end, true)
 
 ## Installation
 
-See the [Getting Started](https://zskanz.github.io/Synchronizer/docs/intro) guide.
+See the [__Getting Started__](https://zskanz.github.io/Synchronizer/#getting-started) guide.
 
 ## License
 
