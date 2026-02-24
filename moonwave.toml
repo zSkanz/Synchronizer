@@ -1,0 +1,88 @@
+title = "Synchronizer"
+gitRepoUrl = "https://github.com/zSkanz/Synchronizer"
+gitSourceBranch = "main"
+changelog = true
+
+classOrder = [
+	"Synchronizer",
+	"Channel",
+]
+
+apiCategories = [
+	"Constructor",
+	"Mutations",
+	"Events",
+	"Listeners",
+	"Getters",
+	"Cleanup",
+]
+
+[docusaurus]
+onBrokenLinks = "throw"
+onBrokenMarkdownLinks = "warn"
+tagline = "High-performance state synchronization for Roblox"
+organizationName = "zSkanz"
+projectName = "Synchronizer"
+url = "https://zskanz.github.io"
+baseUrl = "/Synchronizer/"
+
+[navbar]
+
+[[navbar.items]]
+href = "https://github.com/zSkanz/Synchronizer"
+label = "GitHub"
+position = "right"
+
+[home]
+enabled = true
+includeReadme = false
+
+[[home.features]]
+title = "⚡ Batched Networking"
+description = "All state mutations within a frame are batched into a single RemoteEvent fire per listener. Multiple Set calls to the same path? Only the final value is sent."
+
+[[home.features]]
+title = "🔒 Server-Authoritative"
+description = "Data lives on the server. Clients receive read-only cached copies with automatic synchronization, rate limiting, and listener validation."
+
+[[home.features]]
+title = "📡 Event-Driven"
+description = "Subscribe to Changed, ArrayInsert, ArrayRemoved, DictionaryInsert, and DictionaryRemoved events on any nested dot-separated path."
+
+[[home.features]]
+title = "🧹 Zero Memory Leaks"
+description = "Complete cleanup on channel destruction — signals, connections, remotes, listeners, and cache tables are all properly disposed."
+
+[[home.features]]
+title = "📝 Strict Typing"
+description = "Full --!strict mode with exported types for Channel and Synchronizer. Enjoy IDE autocompletion and type safety out of the box."
+
+[[home.features]]
+title = "🔗 Fluent API"
+description = "Mutation methods return self for chaining. Write channel:Set('coins', 100):Set('level', 5):Increase('exp', 200) in a single expression."
+
+[footer]
+style = "dark"
+copyright = "Copyright © 2026 Skanz. Built with Moonwave and Docusaurus."
+
+[[footer.links]]
+title = "Documentation"
+
+[[footer.links.items]]
+label = "Getting Started"
+to = "docs/intro"
+
+[[footer.links.items]]
+label = "API Reference"
+to = "api"
+
+[[footer.links]]
+title = "Community"
+
+[[footer.links.items]]
+label = "GitHub"
+href = "https://github.com/zSkanz/Synchronizer"
+
+[[footer.links.items]]
+label = "Issues"
+href = "https://github.com/zSkanz/Synchronizer/issues"

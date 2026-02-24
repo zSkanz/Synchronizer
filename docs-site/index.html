@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Synchronizer v3.0 — Roblox State Synchronization</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg-card: #12121a;
+  --bg-card-hover: #181824;
+  --bg-code: #0d0d14;
+  --bg-sidebar: #0e0e16;
+  --border: #1e1e2e;
+  --border-subtle: #16161f;
+  --text: #e2e2ef;
+  --text-dim: #8888a0;
+  --text-dimmer: #55556a;
+  --accent: #6c5ce7;
+  --accent-glow: rgba(108, 92, 231, 0.15);
+  --accent-bright: #a29bfe;
+  --green: #00cec9;
+  --green-glow: rgba(0, 206, 201, 0.15);
+  --orange: #e17055;
+  --yellow: #fdcb6e;
+  --pink: #fd79a8;
+  --font: 'Plus Jakarta Sans', -apple-system, sans-serif;
+  --mono: 'JetBrains Mono', 'Fira Code', monospace;
+  --radius: 10px;
+  --sidebar-w: 280px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+}
+
+::selection {
+  background: var(--accent);
+  color: #fff;
+}
+
+a { color: var(--accent-bright); text-decoration: none; transition: color 0.2s; }
+a:hover { color: #fff; }
+
+/* ──────── SIDEBAR ──────── */
+.sidebar {
+  position: fixed;
+  top: 0; left: 0;
+  width: var(--sidebar-w);
+  height: 100vh;
+  background: var(--bg-sidebar);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  padding: 24px 0;
+}
+
+.sidebar-logo {
+  padding: 0 24px 20px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+
+.sidebar-logo h1 {
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  background: linear-gradient(135deg, var(--accent-bright), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.sidebar-logo span {
+  font-size: 11px;
+  color: var(--text-dimmer);
+  font-weight: 500;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+.sidebar-section {
+  padding: 8px 16px 4px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--text-dimmer);
+}
+
+.sidebar nav a {
+  display: block;
+  padding: 7px 24px;
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--text-dim);
+  transition: all 0.15s;
+  border-left: 2px solid transparent;
+}
+
+.sidebar nav a:hover,
+.sidebar nav a.active {
+  color: var(--text);
+  background: var(--accent-glow);
+  border-left-color: var(--accent);
+}
+
+.sidebar nav a code {
+  font-family: var(--mono);
+  font-size: 12px;
+  background: rgba(108,92,231,0.1);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+
+/* ──────── MAIN ──────── */
+.main {
+  margin-left: var(--sidebar-w);
+  min-height: 100vh;
+}
+
+/* ──────── HERO ──────── */
+.hero {
+  position: relative;
+  padding: 100px 60px 80px;
+  overflow: hidden;
+  border-bottom: 1px solid var(--border);
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -200px; right: -200px;
+  width: 600px; height: 600px;
+  background: radial-gradient(circle, var(--accent-glow), transparent 70%);
+  pointer-events: none;
+}
+
+.hero::after {
+  content: '';
+  position: absolute;
+  bottom: -150px; left: -100px;
+  width: 400px; height: 400px;
+  background: radial-gradient(circle, var(--green-glow), transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-block;
+  padding: 5px 14px;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-glow);
+  border: 1px solid rgba(0,206,201,0.2);
+  border-radius: 20px;
+  margin-bottom: 20px;
+}
+
+.hero h2 {
+  font-size: 48px;
+  font-weight: 800;
+  letter-spacing: -1.5px;
+  line-height: 1.1;
+  margin-bottom: 16px;
+}
+
+.hero h2 span {
+  background: linear-gradient(135deg, var(--accent-bright), var(--green));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero p {
+  font-size: 17px;
+  color: var(--text-dim);
+  max-width: 600px;
+  line-height: 1.7;
+}
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 40px;
+  max-width: 900px;
+}
+
+.feature {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 20px;
+  transition: all 0.2s;
+}
+
+.feature:hover {
+  background: var(--bg-card-hover);
+  border-color: rgba(108,92,231,0.3);
+  transform: translateY(-2px);
+}
+
+.feature-icon {
+  font-size: 22px;
+  margin-bottom: 10px;
+}
+
+.feature h4 {
+  font-size: 13px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.feature p {
+  font-size: 12px;
+  color: var(--text-dimmer);
+  line-height: 1.5;
+}
+
+/* ──────── CONTENT ──────── */
+.content {
+  max-width: 820px;
+  padding: 50px 60px 100px;
+}
+
+.content section {
+  margin-bottom: 60px;
+}
+
+.content h2 {
+  font-size: 28px;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  margin-bottom: 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.content h3 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 32px 0 12px;
+  color: var(--accent-bright);
+}
+
+.content h4 {
+  font-size: 15px;
+  font-weight: 700;
+  margin: 24px 0 8px;
+  color: var(--text);
+}
+
+.content p {
+  margin-bottom: 14px;
+  color: var(--text-dim);
+  font-size: 14.5px;
+}
+
+.content ul, .content ol {
+  margin: 0 0 16px 20px;
+  color: var(--text-dim);
+  font-size: 14.5px;
+}
+
+.content li { margin-bottom: 6px; }
+.content li strong { color: var(--text); }
+
+/* ──────── CODE BLOCKS ──────── */
+pre {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 22px;
+  overflow-x: auto;
+  margin: 12px 0 20px;
+  position: relative;
+}
+
+pre code {
+  font-family: var(--mono);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--text);
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.88em;
+  background: rgba(108,92,231,0.1);
+  padding: 2px 6px;
+  border-radius: 4px;
+  color: var(--accent-bright);
+}
+
+pre code { background: none; padding: 0; }
+
+/* Syntax colors */
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.str { color: #c3e88d; }
+.cm { color: #546e7a; }
+.num { color: #f78c6c; }
+.op { color: #89ddff; }
+.self { color: #f07178; }
+.type { color: #ffcb6b; }
+
+/* ──────── API METHOD CARDS ──────── */
+.method {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 16px 0;
+  transition: border-color 0.2s;
+}
+
+.method:hover {
+  border-color: rgba(108,92,231,0.3);
+}
+
+.method-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.method-name {
+  font-family: var(--mono);
+  font-size: 15px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.method-tag {
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 8px;
+  border-radius: 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.tag-server {
+  background: rgba(225,112,85,0.15);
+  color: var(--orange);
+  border: 1px solid rgba(225,112,85,0.25);
+}
+
+.tag-shared {
+  background: rgba(108,92,231,0.15);
+  color: var(--accent-bright);
+  border: 1px solid rgba(108,92,231,0.25);
+}
+
+.tag-yields {
+  background: rgba(253,203,110,0.15);
+  color: var(--yellow);
+  border: 1px solid rgba(253,203,110,0.25);
+}
+
+.tag-chainable {
+  background: rgba(0,206,201,0.15);
+  color: var(--green);
+  border: 1px solid rgba(0,206,201,0.25);
+}
+
+.method-desc {
+  font-size: 13.5px;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  line-height: 1.6;
+}
+
+.method-params {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.param, .returns {
+  display: flex;
+  gap: 10px;
+  align-items: baseline;
+  font-size: 13px;
+}
+
+.param-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--text-dimmer);
+  min-width: 55px;
+}
+
+.param-name {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: var(--text);
+  font-size: 12.5px;
+}
+
+.param-type {
+  font-family: var(--mono);
+  color: var(--yellow);
+  font-size: 12px;
+}
+
+.param-dash { color: var(--text-dimmer); }
+
+.param-desc {
+  color: var(--text-dim);
+  font-size: 12.5px;
+}
+
+/* ──────── INFO BOXES ──────── */
+.info-box {
+  border-radius: var(--radius);
+  padding: 16px 20px;
+  margin: 16px 0;
+  font-size: 13.5px;
+}
+
+.info-box.tip {
+  background: rgba(0,206,201,0.08);
+  border: 1px solid rgba(0,206,201,0.2);
+  color: var(--green);
+}
+
+.info-box.warn {
+  background: rgba(253,203,110,0.08);
+  border: 1px solid rgba(253,203,110,0.2);
+  color: var(--yellow);
+}
+
+.info-box.note {
+  background: rgba(108,92,231,0.08);
+  border: 1px solid rgba(108,92,231,0.2);
+  color: var(--accent-bright);
+}
+
+.info-box strong {
+  display: block;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 4px;
+}
+
+/* ──────── ARCHITECTURE DIAGRAM ──────── */
+.diagram {
+  background: var(--bg-code);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  margin: 16px 0;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.5;
+  white-space: pre;
+  overflow-x: auto;
+  color: var(--text-dim);
+}
+
+/* ──────── PROPERTY TABLE ──────── */
+.prop-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 12px 0 20px;
+  font-size: 13.5px;
+}
+
+.prop-table th {
+  text-align: left;
+  padding: 10px 14px;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--text-dimmer);
+  border-bottom: 1px solid var(--border);
+}
+
+.prop-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+}
+
+.prop-table td:first-child {
+  font-family: var(--mono);
+  font-size: 12.5px;
+  color: var(--accent-bright);
+  font-weight: 500;
+}
+
+.prop-table td:nth-child(2) {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--yellow);
+}
+
+/* ──────── FOOTER ──────── */
+.footer {
+  margin-left: var(--sidebar-w);
+  border-top: 1px solid var(--border);
+  padding: 30px 60px;
+  color: var(--text-dimmer);
+  font-size: 12px;
+}
+
+/* ──────── MOBILE ──────── */
+.menu-toggle {
+  display: none;
+  position: fixed;
+  top: 16px; left: 16px;
+  z-index: 200;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--text);
+  font-size: 20px;
+  width: 40px; height: 40px;
+  border-radius: 8px;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .sidebar { transform: translateX(-100%); transition: transform 0.3s; }
+  .sidebar.open { transform: translateX(0); }
+  .main { margin-left: 0; }
+  .footer { margin-left: 0; }
+  .menu-toggle { display: flex; }
+  .hero { padding: 80px 24px 60px; }
+  .hero h2 { font-size: 32px; }
+  .content { padding: 30px 24px 80px; }
+  .features { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<button class="menu-toggle" onclick="document.querySelector('.sidebar').classList.toggle('open')">☰</button>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">
+    <h1>Synchronizer</h1>
+    <span>v3.0 Documentation</span>
+  </div>
+
+  <div class="sidebar-section">Guide</div>
+  <nav>
+    <a href="#home" class="active">Home</a>
+    <a href="#getting-started">Getting Started</a>
+    <a href="#basic-usage">Basic Usage</a>
+    <a href="#advanced">Advanced Usage</a>
+  </nav>
+
+  <div class="sidebar-section" style="margin-top:16px">Synchronizer API</div>
+  <nav>
+    <a href="#sync-create"><code>Create()</code></a>
+    <a href="#sync-destroy"><code>Destroy()</code></a>
+    <a href="#sync-get"><code>Get()</code></a>
+    <a href="#sync-getall"><code>GetAllChannels()</code></a>
+    <a href="#sync-gettable"><code>GetTableFromChannel()</code></a>
+    <a href="#sync-wait"><code>Wait()</code></a>
+    <a href="#sync-waitandcall"><code>WaitAndCall()</code></a>
+    <a href="#sync-events">Events</a>
+  </nav>
+
+  <div class="sidebar-section" style="margin-top:16px">Channel API</div>
+  <nav>
+    <a href="#ch-set"><code>Set()</code></a>
+    <a href="#ch-increase"><code>Increase()</code></a>
+    <a href="#ch-insertarray"><code>InsertOnArray()</code></a>
+    <a href="#ch-removearray"><code>RemoveFromArray()</code></a>
+    <a href="#ch-insertdict"><code>InsertOnDictionary()</code></a>
+    <a href="#ch-removedict"><code>RemoveFromDictionary()</code></a>
+    <a href="#ch-onchanged"><code>OnChanged()</code></a>
+    <a href="#ch-onarrayinserted"><code>OnArrayInserted()</code></a>
+    <a href="#ch-onarrayremoved"><code>OnArrayRemoved()</code></a>
+    <a href="#ch-ondictinserted"><code>OnDictionaryInserted()</code></a>
+    <a href="#ch-ondictremoved"><code>OnDictionaryRemoved()</code></a>
+    <a href="#ch-addlistener"><code>AddListener()</code></a>
+    <a href="#ch-removelistener"><code>RemoveListener()</code></a>
+    <a href="#ch-getlisteners"><code>GetListeners()</code></a>
+    <a href="#ch-get"><code>Get()</code></a>
+    <a href="#ch-getindex"><code>GetIndex()</code></a>
+    <a href="#ch-gettable"><code>GetTable()</code></a>
+    <a href="#ch-clearsignal"><code>ClearSignal()</code></a>
+    <a href="#ch-destroy"><code>Destroy()</code></a>
+    <a href="#ch-events">Events</a>
+  </nav>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+
+  <!-- HERO -->
+  <header class="hero" id="home">
+    <div class="hero-badge">Open Source · MIT License</div>
+    <h2>State Sync<br>Made <span>Simple</span></h2>
+    <p>Server-authoritative data channels with automatic client replication, batched networking, and event-driven updates for Roblox.</p>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <h4>Batched Networking</h4>
+        <p>All mutations are queued and sent as a single payload per frame. Zero wasted bandwidth.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <h4>Server-Authoritative</h4>
+        <p>Data lives on the server. Clients receive read-only caches with rate limiting and validation.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📡</div>
+        <h4>Event-Driven</h4>
+        <p>Subscribe to changes at any path. Supports nested paths, arrays, and dictionaries.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🧹</div>
+        <h4>Zero Memory Leaks</h4>
+        <p>Automatic cleanup on destroy. PlayerRemoving cleanup for rate limit caches.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔗</div>
+        <h4>Fluent API</h4>
+        <p>Chain mutations together. <code>channel:Set():Set():Increase()</code> — all batched.</p>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🛡️</div>
+        <h4>Strict Typing</h4>
+        <p>Full Luau type annotations for autocomplete and static analysis.</p>
+      </div>
+    </div>
+  </header>
+
+  <div class="content">
+
+    <!-- GETTING STARTED -->
+    <section id="getting-started">
+      <h2>Getting Started</h2>
+
+      <h3>Installation (Roblox Studio)</h3>
+      <ol>
+        <li>Create a <strong>ModuleScript</strong> named <code>Synchronizer</code> inside <code>ReplicatedStorage/Packages</code></li>
+        <li>Create a child <strong>ModuleScript</strong> named <code>Channel</code> inside it</li>
+        <li>Copy the contents of <code>src/Synchronizer.luau</code> and <code>src/Channel.luau</code> respectively</li>
+      </ol>
+
+      <pre><code>ReplicatedStorage
+└── Packages
+    ├── Synchronizer         <span class="cm">← Synchronizer.luau</span>
+    │   └── Channel          <span class="cm">← Channel.luau</span>
+    └── Signal               <span class="cm">← (dependency)</span></code></pre>
+
+      <h3>Via Rojo / Git</h3>
+      <pre><code><span class="fn">git clone</span> https://github.com/zSkanz/Synchronizer.git</code></pre>
+
+      <h3>Dependencies</h3>
+      <p>Synchronizer requires a <strong>Signal</strong> module as a sibling inside <code>Packages</code>. We recommend <a href="https://github.com/sleitnick/signal" target="_blank">sleitnick/signal</a>.</p>
+    </section>
+
+    <!-- BASIC USAGE -->
+    <section id="basic-usage">
+      <h2>Basic Usage</h2>
+
+      <h3>Server</h3>
+      <pre><code><span class="kw">local</span> ReplicatedStorage = game:GetService(<span class="str">"ReplicatedStorage"</span>)
+<span class="kw">local</span> Players = game:GetService(<span class="str">"Players"</span>)
+<span class="kw">local</span> Synchronizer = <span class="fn">require</span>(ReplicatedStorage.Packages.Synchronizer)
+
+Players.PlayerAdded:Connect(<span class="kw">function</span>(player)
+    <span class="cm">-- Create a channel with initial data</span>
+    <span class="kw">local</span> channel = Synchronizer:<span class="fn">Create</span>(player.UserId, {
+        coins = <span class="num">0</span>;
+        level = <span class="num">1</span>;
+        inventory = {};
+    })
+
+    <span class="cm">-- Register the player as a listener</span>
+    channel:<span class="fn">AddListener</span>(player)
+
+    <span class="cm">-- Mutate data — clients update automatically</span>
+    channel:<span class="fn">Set</span>(<span class="str">"coins"</span>, <span class="num">100</span>)
+    channel:<span class="fn">Increase</span>(<span class="str">"coins"</span>, <span class="num">50</span>)
+    channel:<span class="fn">InsertOnArray</span>(<span class="str">"inventory"</span>, <span class="str">"Sword"</span>)
+<span class="kw">end</span>)
+
+Players.PlayerRemoving:Connect(<span class="kw">function</span>(player)
+    Synchronizer:<span class="fn">Destroy</span>(player.UserId)
+<span class="kw">end</span>)</code></pre>
+
+      <h3>Client</h3>
+      <pre><code><span class="kw">local</span> ReplicatedStorage = game:GetService(<span class="str">"ReplicatedStorage"</span>)
+<span class="kw">local</span> Synchronizer = <span class="fn">require</span>(ReplicatedStorage.Packages.Synchronizer)
+
+<span class="kw">local</span> channel = Synchronizer:<span class="fn">Wait</span>(game.Players.LocalPlayer.UserId)
+
+<span class="cm">-- Listen for changes (forceCall = true fires immediately with current value)</span>
+channel:<span class="fn">OnChanged</span>(<span class="str">"coins"</span>, <span class="kw">function</span>(newValue, oldValue)
+    <span class="fn">print</span>(<span class="str">"Coins:"</span>, oldValue, <span class="str">"→"</span>, newValue)
+<span class="kw">end</span>, <span class="kw">true</span>)
+
+channel:<span class="fn">OnArrayInserted</span>(<span class="str">"inventory"</span>, <span class="kw">function</span>(item, index)
+    <span class="fn">print</span>(<span class="str">"New item:"</span>, item, <span class="str">"at index"</span>, index)
+<span class="kw">end</span>)
+
+<span class="cm">-- Read values directly</span>
+<span class="kw">local</span> coins = channel:<span class="fn">Get</span>(<span class="str">"coins"</span>)
+<span class="kw">local</span> allData = channel:<span class="fn">GetTable</span>()</code></pre>
+
+      <h3>How It Works</h3>
+      <div class="diagram">Server                                          Client
+┌─────────────────────┐                  ┌─────────────────────┐
+│  Synchronizer       │                  │  Synchronizer       │
+│  ├── Channel A      │   FireClient     │  ├── Channel A      │
+│  │   ├── Set()  ────┼──(batched/frame)─┼──│   ├── CacheTable │
+│  │   ├── Queue  ────┼─────────────────►│  │   ├── OnChanged  │
+│  │   └── Listeners  │                  │  │   └── Signals    │
+│  └── Channel B      │                  │  └── Channel B      │
+└─────────────────────┘                  └─────────────────────┘</div>
+      <ol>
+        <li><strong>Server</strong> mutates data via <code>Set</code>, <code>Increase</code>, <code>InsertOnArray</code>, etc.</li>
+        <li>Mutations are queued and <strong>deduplicated</strong> within the frame.</li>
+        <li>On <code>RunService.Stepped</code>, all queued actions are <strong>batched</strong> and sent to listeners.</li>
+        <li><strong>Client</strong> receives the batch, updates its cache, and fires local signals.</li>
+      </ol>
+    </section>
+
+    <!-- ADVANCED USAGE -->
+    <section id="advanced">
+      <h2>Advanced Usage</h2>
+
+      <h3>Path System</h3>
+      <p>Dot-separated paths navigate nested data structures:</p>
+      <pre><code>channel:<span class="fn">Set</span>(<span class="str">"stats.health"</span>, <span class="num">80</span>)
+channel:<span class="fn">Increase</span>(<span class="str">"stats.mana"</span>, <span class="num">10</span>)
+channel:<span class="fn">OnChanged</span>(<span class="str">"stats.health"</span>, <span class="kw">function</span>(newHP, oldHP)
+    <span class="fn">print</span>(<span class="str">"HP:"</span>, oldHP, <span class="str">"→"</span>, newHP)
+<span class="kw">end</span>)</code></pre>
+
+      <h3>Chaining Mutations</h3>
+      <p>All mutation methods return <code>self</code> for chaining. All three happen in memory immediately but are sent as a <strong>single network payload</strong>:</p>
+      <pre><code>channel
+    :<span class="fn">Set</span>(<span class="str">"coins"</span>, <span class="num">500</span>)
+    :<span class="fn">Set</span>(<span class="str">"level"</span>, <span class="num">10</span>)
+    :<span class="fn">Increase</span>(<span class="str">"coins"</span>, <span class="num">100</span>)</code></pre>
+
+      <h3>ClearSignal — Dynamic Cleanup</h3>
+      <p>Clean up all signals matching a substring when a dynamic entity is removed:</p>
+      <pre><code><span class="cm">-- Destroy every signal whose path contains "hero_abc"</span>
+channel:<span class="fn">ClearSignal</span>(<span class="str">"hero_abc"</span>)</code></pre>
+
+      <h3>WaitAndCall — Non-Yielding</h3>
+      <p>Unlike <code>Wait</code>, this uses a callback and does <strong>not</strong> yield the thread:</p>
+      <pre><code>Synchronizer:<span class="fn">WaitAndCall</span>(player.UserId, <span class="kw">function</span>(channel)
+    channel:<span class="fn">OnChanged</span>(<span class="str">"coins"</span>, <span class="kw">function</span>(newValue)
+        updateCoinUI(newValue)
+    <span class="kw">end</span>, <span class="kw">true</span>)
+<span class="kw">end</span>)
+<span class="fn">print</span>(<span class="str">"This runs without waiting!"</span>)</code></pre>
+
+      <h3>Configuration</h3>
+      <pre><code><span class="kw">local</span> Settings = {
+    MAX_REQUESTS_PER_SECOND = <span class="num">10</span>;  <span class="cm">-- Rate limit for client data requests</span>
+    DESTROY_CLEANUP_DELAY = <span class="num">5</span>;     <span class="cm">-- Seconds before remote cleanup after destroy</span>
+}</code></pre>
+
+      <h3>Security</h3>
+      <ul>
+        <li><strong>Listener Validation</strong> — Clients can only request data from channels they are registered listeners of.</li>
+        <li><strong>Rate Limiting</strong> — Clients exceeding <code>MAX_REQUESTS_PER_SECOND</code> are blocked with a warning.</li>
+        <li><strong>Data Validation</strong> — Incoming client event data is type-checked before processing.</li>
+        <li><strong>Cache Isolation</strong> — Each client has its own cache table, independent of the server.</li>
+      </ul>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- SYNCHRONIZER API -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <section id="synchronizer-api">
+      <h2>Synchronizer API</h2>
+
+      <div class="method" id="sync-create">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:Create(index, referenceTable?)</span>
+          <span class="method-tag tag-server">Server</span>
+        </div>
+        <div class="method-desc">Creates a new channel with the given index and optional initial data table. If a channel already exists at that index, returns the existing one.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Unique identifier for the channel</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">referenceTable</span> <span class="param-type">{[any]: any}?</span> <span class="param-dash">—</span> <span class="param-desc">Initial data (defaults to empty table)</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+        <pre><code><span class="kw">local</span> channel = Synchronizer:<span class="fn">Create</span>(player.UserId, {
+    coins = <span class="num">0</span>;
+    level = <span class="num">1</span>;
+})</code></pre>
+      </div>
+
+      <div class="method" id="sync-destroy">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:Destroy(index)</span>
+          <span class="method-tag tag-server">Server</span>
+        </div>
+        <div class="method-desc">Destroys a channel and cleans up all associated resources including signals, connections, and listeners.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Index of the channel to destroy</span></div>
+        </div>
+        <pre><code>Synchronizer:<span class="fn">Destroy</span>(player.UserId)</code></pre>
+      </div>
+
+      <div class="method" id="sync-get">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:Get(index)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns the channel with the given index, or <code>nil</code> if it doesn't exist.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Index of the channel</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel?</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="sync-getall">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:GetAllChannels()</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns a dictionary of all active channels.</div>
+        <div class="method-params">
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">{[any]: Channel}</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="sync-gettable">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:GetTableFromChannel(index)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns the raw data table from a channel, or <code>nil</code> if it doesn't exist.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Index of the channel</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">{[any]: any}?</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="sync-wait">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:Wait(index)</span>
+          <span class="method-tag tag-shared">Shared</span>
+          <span class="method-tag tag-yields">Yields</span>
+        </div>
+        <div class="method-desc">Yields the current thread until a channel with the given index exists. Returns immediately if it already exists.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Index of the channel to wait for</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="sync-waitandcall">
+        <div class="method-header">
+          <span class="method-name">Synchronizer:WaitAndCall(index, callback)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Calls the callback when a channel with the given index exists. Unlike <code>Wait</code>, this does <strong>not</strong> yield the current thread.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Index of the channel</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">callback</span> <span class="param-type">(Channel) → ()</span> <span class="param-dash">—</span> <span class="param-desc">Called when channel is ready</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="sync-events">
+        <div class="method-header">
+          <span class="method-name">Synchronizer Events</span>
+        </div>
+        <table class="prop-table">
+          <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          <tr><td>OnChannelCreated</td><td>Signal&lt;Channel&gt;</td><td>Fires when a new channel is created</td></tr>
+          <tr><td>OnChannelDestroyed</td><td>Signal&lt;Channel&gt;</td><td>Fires when a channel is destroyed</td></tr>
+          <tr><td>OnChannelListenerAdded</td><td>Signal&lt;Channel, Player&gt;</td><td>Fires when a player is added as a listener</td></tr>
+          <tr><td>OnChannelListenerRemoved</td><td>Signal&lt;Channel, Player&gt;</td><td>Fires when a player is removed as a listener</td></tr>
+        </table>
+      </div>
+    </section>
+
+    <!-- ═══════════════════════════════════════ -->
+    <!-- CHANNEL API -->
+    <!-- ═══════════════════════════════════════ -->
+
+    <section id="channel-api">
+      <h2>Channel API</h2>
+
+      <p>Channels are created through <code>Synchronizer:Create()</code> and should not be instantiated directly. All mutation methods are <strong>server-only</strong> and return <code>self</code> for chaining.</p>
+
+      <h3>Mutations</h3>
+
+      <div class="method" id="ch-set">
+        <div class="method-header">
+          <span class="method-name">Channel:Set(path, value)</span>
+          <span class="method-tag tag-server">Server</span>
+          <span class="method-tag tag-chainable">Chainable</span>
+        </div>
+        <div class="method-desc">Sets the value at the given path. Existing values are overwritten.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">value</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">New value</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+        <pre><code>channel:<span class="fn">Set</span>(<span class="str">"coins"</span>, <span class="num">100</span>)
+channel:<span class="fn">Set</span>(<span class="str">"stats.health"</span>, <span class="num">80</span>)</code></pre>
+      </div>
+
+      <div class="method" id="ch-increase">
+        <div class="method-header">
+          <span class="method-name">Channel:Increase(path, value)</span>
+          <span class="method-tag tag-server">Server</span>
+          <span class="method-tag tag-chainable">Chainable</span>
+        </div>
+        <div class="method-desc">Increments a numeric value at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path to a numeric value</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">value</span> <span class="param-type">number</span> <span class="param-dash">—</span> <span class="param-desc">Amount to add (can be negative)</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+        <pre><code>channel:<span class="fn">Increase</span>(<span class="str">"coins"</span>, <span class="num">50</span>)
+channel:<span class="fn">Increase</span>(<span class="str">"stats.mana"</span>, <span class="num">-10</span>)</code></pre>
+      </div>
+
+      <div class="method" id="ch-insertarray">
+        <div class="method-header">
+          <span class="method-name">Channel:InsertOnArray(path, value, targetIndex?)</span>
+          <span class="method-tag tag-server">Server</span>
+        </div>
+        <div class="method-desc">Inserts a value into an array at the given path. Optionally specify the position.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path to the array</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">value</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Value to insert</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">targetIndex</span> <span class="param-type">number?</span> <span class="param-dash">—</span> <span class="param-desc">Position to insert at (default: end)</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">number?</span> <span class="param-dash">—</span> <span class="param-desc">The index the value was inserted at</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-removearray">
+        <div class="method-header">
+          <span class="method-name">Channel:RemoveFromArray(path, index)</span>
+          <span class="method-tag tag-server">Server</span>
+        </div>
+        <div class="method-desc">Removes a value from an array at the given index.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path to the array</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">number</span> <span class="param-dash">—</span> <span class="param-desc">Index to remove</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">any?</span> <span class="param-dash">—</span> <span class="param-desc">The removed value</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-insertdict">
+        <div class="method-header">
+          <span class="method-name">Channel:InsertOnDictionary(path, index, value)</span>
+          <span class="method-tag tag-server">Server</span>
+        </div>
+        <div class="method-desc">Inserts a key-value pair into a dictionary at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path to the dictionary</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Key to insert</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">value</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Value to insert</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-removedict">
+        <div class="method-header">
+          <span class="method-name">Channel:RemoveFromDictionary(path, index)</span>
+          <span class="method-tag tag-server">Server</span>
+        </div>
+        <div class="method-desc">Removes a key from a dictionary at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path to the dictionary</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">index</span> <span class="param-type">any</span> <span class="param-dash">—</span> <span class="param-desc">Key to remove</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">any?</span> <span class="param-dash">—</span> <span class="param-desc">The removed value</span></div>
+        </div>
+      </div>
+
+      <h3>Events</h3>
+
+      <div class="method" id="ch-onchanged">
+        <div class="method-header">
+          <span class="method-name">Channel:OnChanged(path, callback, forceCall?)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Subscribes to value changes at the given path. If <code>forceCall</code> is true, fires immediately with the current value.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Dot-separated path</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">callback</span> <span class="param-type">(newValue, oldValue) → ()</span> <span class="param-dash">—</span> <span class="param-desc">Handler function</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">forceCall</span> <span class="param-type">boolean?</span> <span class="param-dash">—</span> <span class="param-desc">Fire immediately with current value</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Connection</span></div>
+        </div>
+        <pre><code>channel:<span class="fn">OnChanged</span>(<span class="str">"coins"</span>, <span class="kw">function</span>(newValue, oldValue)
+    <span class="fn">print</span>(<span class="str">"Coins:"</span>, oldValue, <span class="str">"→"</span>, newValue)
+<span class="kw">end</span>, <span class="kw">true</span>)</code></pre>
+      </div>
+
+      <div class="method" id="ch-onarrayinserted">
+        <div class="method-header">
+          <span class="method-name">Channel:OnArrayInserted(path, callback)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Subscribes to array insertion events at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">callback</span> <span class="param-type">(value, index) → ()</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Connection</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-onarrayremoved">
+        <div class="method-header">
+          <span class="method-name">Channel:OnArrayRemoved(path, callback)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Subscribes to array removal events at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">callback</span> <span class="param-type">(value, index) → ()</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Connection</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-ondictinserted">
+        <div class="method-header">
+          <span class="method-name">Channel:OnDictionaryInserted(path, callback)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Subscribes to dictionary insertion events at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">callback</span> <span class="param-type">(value, key) → ()</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Connection</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-ondictremoved">
+        <div class="method-header">
+          <span class="method-name">Channel:OnDictionaryRemoved(path, callback)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Subscribes to dictionary removal events at the given path.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string</span></div>
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">callback</span> <span class="param-type">(value, key) → ()</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Connection</span></div>
+        </div>
+      </div>
+
+      <h3>Listeners</h3>
+
+      <div class="method" id="ch-addlistener">
+        <div class="method-header">
+          <span class="method-name">Channel:AddListener(player)</span>
+          <span class="method-tag tag-server">Server</span>
+          <span class="method-tag tag-chainable">Chainable</span>
+        </div>
+        <div class="method-desc">Adds a player as a listener. They will receive all future updates from this channel.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">listener</span> <span class="param-type">Player</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-removelistener">
+        <div class="method-header">
+          <span class="method-name">Channel:RemoveListener(player)</span>
+          <span class="method-tag tag-server">Server</span>
+          <span class="method-tag tag-chainable">Chainable</span>
+        </div>
+        <div class="method-desc">Removes a player from the listener list. They will no longer receive updates.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">listener</span> <span class="param-type">Player</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-getlisteners">
+        <div class="method-header">
+          <span class="method-name">Channel:GetListeners()</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns the list of players currently listening to this channel.</div>
+        <div class="method-params">
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">{Player}</span></div>
+        </div>
+      </div>
+
+      <h3>Getters</h3>
+
+      <div class="method" id="ch-get">
+        <div class="method-header">
+          <span class="method-name">Channel:Get(path?)</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns the value at the given path, or the full data table if no path is provided.</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">path</span> <span class="param-type">string?</span> <span class="param-dash">—</span> <span class="param-desc">Optional dot-separated path</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">any</span></div>
+        </div>
+        <pre><code><span class="kw">local</span> coins = channel:<span class="fn">Get</span>(<span class="str">"coins"</span>)
+<span class="kw">local</span> allData = channel:<span class="fn">Get</span>() <span class="cm">-- returns full table</span></code></pre>
+      </div>
+
+      <div class="method" id="ch-getindex">
+        <div class="method-header">
+          <span class="method-name">Channel:GetIndex()</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns the channel's unique index.</div>
+        <div class="method-params">
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">any</span></div>
+        </div>
+      </div>
+
+      <div class="method" id="ch-gettable">
+        <div class="method-header">
+          <span class="method-name">Channel:GetTable()</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Returns the raw data table. On the server this is the reference table; on the client, the cached copy.</div>
+        <div class="method-params">
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">{[any]: any}</span></div>
+        </div>
+      </div>
+
+      <h3>Cleanup</h3>
+
+      <div class="method" id="ch-clearsignal">
+        <div class="method-header">
+          <span class="method-name">Channel:ClearSignal(signalIdentifier)</span>
+          <span class="method-tag tag-shared">Shared</span>
+          <span class="method-tag tag-chainable">Chainable</span>
+        </div>
+        <div class="method-desc">Destroys all signals whose path contains the given identifier. Useful for cleaning up signals related to a dynamic entity (e.g. a UID).</div>
+        <div class="method-params">
+          <div class="param"><span class="param-label">Param</span> <span class="param-name">signalIdentifier</span> <span class="param-type">string</span> <span class="param-dash">—</span> <span class="param-desc">Substring to match against signal paths</span></div>
+          <div class="returns"><span class="param-label">Returns</span> <span class="param-type">Channel</span></div>
+        </div>
+        <pre><code><span class="cm">-- Destroys every signal containing "hero_abc"</span>
+channel:<span class="fn">ClearSignal</span>(<span class="str">"hero_abc"</span>)</code></pre>
+      </div>
+
+      <div class="method" id="ch-destroy">
+        <div class="method-header">
+          <span class="method-name">Channel:Destroy()</span>
+          <span class="method-tag tag-shared">Shared</span>
+        </div>
+        <div class="method-desc">Destroys this channel and all associated resources. Delegates to <code>Synchronizer:Destroy()</code> for proper cleanup.</div>
+      </div>
+
+      <div class="method" id="ch-events">
+        <div class="method-header">
+          <span class="method-name">Channel Events</span>
+        </div>
+        <table class="prop-table">
+          <tr><th>Property</th><th>Type</th><th>Description</th></tr>
+          <tr><td>OnDestroyed</td><td>Signal&lt;Channel&gt;</td><td>Fires when this channel is destroyed</td></tr>
+        </table>
+      </div>
+    </section>
+
+  </div>
+
+  <footer class="footer">
+    Copyright © 2026 Skanz. Built with ❤️ · MIT License · <a href="https://github.com/zSkanz/Synchronizer" target="_blank">GitHub</a>
+  </footer>
+</div>
+
+<script>
+// Active sidebar link on scroll
+const sections = document.querySelectorAll('.method[id], section[id], header[id]');
+const navLinks = document.querySelectorAll('.sidebar nav a');
+
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      navLinks.forEach(l => l.classList.remove('active'));
+      const id = entry.target.id;
+      const link = document.querySelector(`.sidebar nav a[href="#${id}"]`);
+      if (link) link.classList.add('active');
+    }
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+
+sections.forEach(s => observer.observe(s));
+
+// Close mobile sidebar on link click
+navLinks.forEach(link => {
+  link.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('open');
+  });
+});
+</script>
+</body>
+</html>
