@@ -34,7 +34,7 @@ git clone https://github.com/zSkanz/Synchronizer.git
 
 ### Dependencies
 
-Synchronizer requires a **Signal** module as a sibling inside `Packages`. We recommend [sleitnick/signal](https://github.com/sleitnick/signal).
+Synchronizer requires a **Signal** module as a sibling inside `Packages`. We recommend [sleitnick/signal](https://sleitnick.github.io/RbxUtil/api/Signal/).
 
 ## Basic Usage
 
